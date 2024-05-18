@@ -7,7 +7,7 @@ import random
 
 # ↓サーバーへの接続プログラム===================
 soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-soc.connect(("153.240.10.7", 60064))
+soc.connect(("127.0.0.1", 60013))
 
 # ↓名前を決めるウィンドウのプログラム=============
 
@@ -100,6 +100,26 @@ def type_event(event):
         case "Return":
             if str(window.focus_get()) == ".!frame.!entry":
                 sendmessage()
+
+# 名前を変更するための新しいウィンドウと関数を追加
+def change_name():
+    changewindow = tkinter.Toplevel()
+    tkinter.Label(changewindow, text="新しい名前を入力してください", font=("Arial", 14)).pack()
+
+    new_name_entry = tkinter.Entry(changewindow, font=("Arial", 14))
+    new_name_entry.pack()
+
+    def submit_new_name():
+        new_name = new_name_entry.get()
+        if new_name:
+            soc.send(f"名前変更: {new_name}".encode())
+            changewindow.destroy()
+
+    tkinter.Button(changewindow, text="名前を変更", command=submit_new_name).pack()
+
+# メインウィンドウに名前変更ボタンを追加
+change_name_button = tkinter.Button(window, text="名前を変更", command=change_name)
+change_name_button.pack()
 
 window.bind("<KeyPress>", type_event)
 
