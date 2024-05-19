@@ -52,6 +52,8 @@ def handle_command(command):
 def clear_log():
     mainclass.clear()
 
+
+
 # コマンドハンドラにclear_logを登録
 register_command("/clear", clear_log)
 
