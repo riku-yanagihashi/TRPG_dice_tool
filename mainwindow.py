@@ -8,9 +8,10 @@ import random
 
 # ダイスを振る、チャットをするウィンドウのプログラム
 class main:
-    def __init__(self, soc, default_font, status_window, handle_command, dataPaths):
+    def __init__(self, soc, default_font, status_window, handle_command, dataPaths, appdata_dir):
         self.soc = soc
         self.dataPaths = dataPaths
+        self.appdata_dir = appdata_dir
 
         self.default_font = default_font
         self.saved_dices = {}
@@ -85,7 +86,7 @@ class main:
 
         self.window.bind("<KeyPress>", self.type_event)
 
-        edit_character_button = tkinter.Button(main_canvas, text="キャラクターステータスを編集", command=lambda:self.status_window(self.default_font, self.dataPaths))
+        edit_character_button = tkinter.Button(main_canvas, text="キャラクターステータスを編集", command=lambda:self.status_window(self.default_font, self.appdata_dir))
         edit_character_button.pack()
 
         self.window.protocol("WM_DELETE_WINDOW", self.window_close)

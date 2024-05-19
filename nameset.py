@@ -1,4 +1,5 @@
 import tkinter
+import tkinter.messagebox
 
 # 名前を決めるウィンドウのプログラム
 class main:
