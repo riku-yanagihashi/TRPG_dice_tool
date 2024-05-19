@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import csv
 import platform
+import tkinter.messagebox
 
 
 saved_dices = {}
@@ -82,8 +83,12 @@ nameentry = tkinter.Entry(font=default_font)
 nameentry.pack()
 
 def enter():
-    soc.send(nameentry.get().encode())
-    namewindow.destroy()
+    name = nameentry.get()
+    if name == "":
+        tkinter.messagebox.showwarning(title="警告", message="名前を入力してください。")
+    else:
+        soc.send(nameentry.get().encode())
+        namewindow.destroy()
 
 tkinter.Button(text="決定", command=enter).pack()
 
