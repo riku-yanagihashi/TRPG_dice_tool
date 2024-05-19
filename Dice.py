@@ -2,6 +2,8 @@ import socket
 import os
 from pathlib import Path
 import platform
+import threading
+import time
 
 import mainwindow
 import nameset
@@ -42,28 +44,4 @@ soc.connect(("127.0.0.1", 60013))
 
 nameset.main(default_font, soc)
 
-# コマンドハンドラの処理
-command_handlers = {}
-
-# コマンドハンドラを登録する関数
-def register_command(command, handler):
-    command_handlers[command] = handler
-
-# コマンドを処理する関数
-def handle_command(command):
-    handler = command_handlers.get(command)
-    if handler:
-        handler()
-
-def clear_log():
-    mainclass.clear()
-
-
-
-# コマンドハンドラにclear_logを登録
-register_command("/clear", clear_log)
-
-
-mainclass = mainwindow.main(soc, default_font, statuswindow.main, handle_command, dataPaths, appdata_dir)
-# ============================================================
-
+mainclass = mainwindow.main(soc, default_font, statuswindow.main, dataPaths, appdata_dir)
