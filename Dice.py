@@ -36,17 +36,17 @@ window.title("ダイス")
 dicecanvas = tkinter.Canvas()
 dicecanvas.pack()
 
-tkinter.Label(dicecanvas, text="ダイス:",font=("Arial", 14)).pack(side="left",anchor="n")
+tkinter.Label(dicecanvas, text="ダイス:", font=("Arial", 14)).pack(side="left", anchor="n")
 
-D_countBox = tkinter.Entry(dicecanvas, width=2,font=("Arial", 14))
+D_countBox = tkinter.Entry(dicecanvas, width=2, font=("Arial", 14))
 D_countBox.insert(0, "1")
-D_countBox.pack(side="left",anchor="n")
+D_countBox.pack(side="left", anchor="n")
 
-tkinter.Label(dicecanvas, text="D",font=("Arial", 14)).pack(side="left",anchor="n")
+tkinter.Label(dicecanvas, text="D", font=("Arial", 14)).pack(side="left", anchor="n")
 
-F_countBox = tkinter.Entry(dicecanvas, width=8,font=("Arial", 14))
+F_countBox = tkinter.Entry(dicecanvas, width=8, font=("Arial", 14))
 F_countBox.insert(0, "100")
-F_countBox.pack(side="left",anchor="n")
+F_countBox.pack(side="left", anchor="n")
 
 def diceroll():
     D_count = int(D_countBox.get())
@@ -57,16 +57,29 @@ def diceroll():
     soc.send(f"{sum(cache)} ({'+'.join(map(str, cache))})-{D_count}D{F_count}".encode())
     print(sum(cache), "+".join(map(str, cache)))
 
-dice_button = tkinter.Button(dicecanvas, text="ダイスを振る", command=diceroll)
-dice_button.pack(side="left",anchor="n")
+def private_diceroll():
+    D_count = int(D_countBox.get())
+    F_count = int(F_countBox.get())
+    cache = []
+    for _ in range(D_count):
+        cache.append(random.randint(1, F_count))
+    result = f"プライベートロール: {sum(cache)} ({'+'.join(map(str, cache))})-{D_count}D{F_count}"
+    print(result)
+    insert_to_log(result)
 
-tkinter.Label(text="ログ:",font=("Arial", 14)).pack(anchor="w")
+dice_button = tkinter.Button(dicecanvas, text="ダイスを振る", command=diceroll)
+dice_button.pack(side="left", anchor="n")
+
+private_dice_button = tkinter.Button(dicecanvas, text="プライベートダイスを振る", command=private_diceroll)
+private_dice_button.pack(side="left", anchor="n")
+
+tkinter.Label(text="ログ:", font=("Arial", 14)).pack(anchor="w")
 
 logbox = tkinter.Text(font=("Arial", 14), state="disabled")
 logbox.pack()
 
 chatframe = tkinter.Frame()
-tkinter.Label(chatframe, text="チャットを入力:",font=("Arial", 14)).pack(anchor="w", side="left")
+tkinter.Label(chatframe, text="チャットを入力:", font=("Arial", 14)).pack(anchor="w", side="left")
 chatentry = tkinter.Entry(chatframe, font=("Arial", 14))
 chatentry.pack(anchor="w", side="left")
 
