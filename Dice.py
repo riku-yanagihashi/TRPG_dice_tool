@@ -6,7 +6,6 @@ import random
 import os
 from pathlib import Path
 import csv
-import pandas as pd
 
 
 saved_dices = {}
