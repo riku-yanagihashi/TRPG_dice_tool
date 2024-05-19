@@ -115,16 +115,6 @@ class main:
 
         self.window.protocol("WM_DELETE_WINDOW", self.window_close)
         self.window.mainloop()
-    
-    # def open_character_select(self):
-    #     self.window.destroy()
-    #     CharacterSelect(self.appdata_dir, self.default_font, self.on_character_selected)
-
-
-    # def on_character_selected(self, character_name):
-    #     print(f"選択されたキャラクター: {character_name}")
-        
-    #     self.__init__(self.soc, self.default_font, self.status_window, self.dataPaths, self.appdata_dir) 
 
     def change_playername(self, name):
         self.playername_entry.configure(state="normal")
@@ -309,27 +299,3 @@ class main:
     def clear_log(self):
         self.clear()
     
-# class CharacterSelect:
-#     def __init__(self, appdata_dir, default_font, on_character_selected):
-#         self.default_font = default_font
-#         self.on_character_selected = on_character_selected  # コールバック関数
-
-#         characters = [os.path.splitext(os.path.basename(file))[0] for file in glob.glob(str(Path(fr"{appdata_dir}/characters/*")))]
-
-#         self.window = tkinter.Tk()
-#         self.window.title("キャラクター選択")
-
-#         tkinter.Label(self.window, text="~キャラクターを選択~", font=default_font).pack()
-#         self.buttons = tkinter.Canvas(self.window)
-#         self.buttons.pack()
-#         for c in characters:
-#             self.add_select_button(c)
-
-#         self.window.mainloop()
-
-#     def set_character_name(self, name):
-#         self.on_character_selected(name)  # コールバック関数を呼び出し
-#         self.window.destroy()  # キャラクター選択ウィンドウを閉じる
-
-#     def add_select_button(self, txt):
-#         tkinter.Button(self.buttons, text=txt, command=lambda: self.set_character_name(txt), font=self.default_font).pack(side="left")

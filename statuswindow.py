@@ -27,9 +27,6 @@ class main:
             entry.grid(row=i, column=1)
             self.entries[status] = entry
 
-        # # キャラクターステータスをロードしてエントリーにセット
-        # self.set_character_status_entries(name_entry, san_entry, str_entry, dex_entry, int_entry, con_entry, pow_entry, app_entry, siz_entry, edu_entry, luck_entry)
-
         # 保存ボタンを追加
         tkinter.Button(status_window, text="保存",
                     command=self.save_character_status).grid(row=len(self.status_list),
@@ -83,28 +80,3 @@ class main:
         #     tkinter.Label(text=self.skills_dict[c], font=self.default_font)
 
         # add_skills_window.mainloop()
-
-
-    # # キャラクターステータスをJSONから読み込み、エントリーにセットする関数
-    # def set_character_status_entries(self, name_entry, san_entry, str_entry, dex_entry, int_entry, con_entry, pow_entry, app_entry, siz_entry, edu_entry, luck_entry):
-    #     character_status = self.load_character_status(name_entry.get())
-    #     if character_status:
-    #         name_entry.insert(0, character_status.get("name", ""))
-    #         san_entry.insert(0, character_status.get("SAN", ""))
-    #         str_entry.insert(0, character_status.get("STR", ""))
-    #         dex_entry.insert(0, character_status.get("DEX", ""))
-    #         int_entry.insert(0, character_status.get("INT", ""))
-    #         con_entry.insert(0, character_status.get("CON", ""))
-    #         pow_entry.insert(0, character_status.get("POW", ""))
-    #         app_entry.insert(0, character_status.get("APP", ""))
-    #         siz_entry.insert(0, character_status.get("SIZ", ""))
-    #         edu_entry.insert(0, character_status.get("EDU", ""))
-    #         luck_entry.insert(0, character_status.get("LUCK", ""))
-
-    # # キャラクターステータスをロードする関数
-    # def load_character_status(self, name):
-    #     try:
-    #         with open(f"{name}.json", "r", encoding="utf-8") as f:
-    #             return json.load(f)
-    #     except FileNotFoundError:
-    #         return None
