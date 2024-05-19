@@ -38,17 +38,20 @@ def clt(client:socket.socket, clientname):
 
 while True:
     client, addr = soc.accept()
-    initial_name = client.recv(1024).decode()  # 参加時の名前を取得
-    
-    send(f"{initial_name}が参加しました。")
-    print(f"{initial_name}が参加しました。")
-    
-    # プレイヤーに色を割り当てる
-    client_color = random.choice(colors)
-    client_colors[initial_name] = client_color
-    
-    # クライアントに色情報を送信
-    client.send(f"色: {client_color}".encode())
-    
-    clients.append(client)
-    threading.Thread(target=clt, args=(client, initial_name)).start()
+    try:
+        initial_name = client.recv(1024).decode()  # 参加時の名前を取得
+        
+        send(f"{initial_name}が参加しました。")
+        print(f"{initial_name}が参加しました。")
+        
+        # プレイヤーに色を割り当てる
+        client_color = random.choice(colors)
+        client_colors[initial_name] = client_color
+        
+        # クライアントに色情報を送信
+        client.send(f"色: {client_color}".encode())
+        
+        clients.append(client)
+        threading.Thread(target=clt, args=(client, initial_name)).start()
+    except Exception:
+        print(f"{addr}の接続が開始前に切断")
