@@ -17,25 +17,24 @@ ToDo: (マークダウン)
 
 class main:
     character_name = ""
-    def __init__(self, appdata_dir, default_font):
+    def __init__(self, appdata_dir, default_font, change_playername):
+        self.change_playername = change_playername
         self.default_font = default_font
         characters = [os.path.splitext(os.path.basename(file))[0] for file in glob.glob(str(Path(fr"{appdata_dir}/characters/*")))]
 
-        window = tkinter.Tk()
+        self.characterselect_window = tkinter.Toplevel()
+        self.characterselect_window.title = "キャラクター選択"
 
-        tkinter.Label(text="~キャラクターを選択~", font=default_font).pack()
-        self.buttons = tkinter.Canvas()
+        tkinter.Label(self.characterselect_window, text="~キャラクターを選択~", font=default_font).pack()
+        self.buttons = tkinter.Canvas(self.characterselect_window)
         self.buttons.pack()
         for c in characters:
             self.add_select_button(c)
 
-        window.mainloop()
-
-    def set_character_name(self, name):
-        self.character_name = name
-        print(self.character_name)
-
     def add_select_button(self, txt):
         tkinter.Button(self.buttons, text=txt, command=lambda:self.set_character_name(txt), font=self.default_font).pack(side="left")
 
-main(fr"{Path(os.getenv('APPDATA')).parent}\\Local\\DiceApp\\", ("Arial", 14))
+    def set_character_name(self, name):
+        self.character_name = name
+        self.change_playername(name)
+        self.characterselect_window.destroy()

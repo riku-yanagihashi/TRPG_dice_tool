@@ -4,7 +4,7 @@ from pathlib import Path
 
 # ステータスウィンドウのプログラム
 class main:
-    def __init__(self, default_font, appdata_dir):
+    def __init__(self, default_font, appdata_dir, name):
         self.appdata_dir = appdata_dir
         self.characters_dir = Path(fr"{self.appdata_dir}/characters/")
         self.default_font = default_font
@@ -18,7 +18,7 @@ class main:
         for i in range(0, len(self.skills_dict), 15):
             self.pageddata.append(list(self.skills_dict)[i: i+15])
 
-        self.status_list = ["name", "STR", "CON", "POW", "DEX", "APP", "SIZ", "INT", "EDU", "年収", "財産", "SAN", "幸運", "アイデア", "知識", "耐久力", "マジックポイント", "ダメージボーナス",]
+        self.status_list = ["name", "job", "STR", "CON", "POW", "DEX", "APP", "SIZ", "INT", "EDU", "年収", "財産", "SAN", "幸運", "アイデア", "知識", "耐久力", "マジックポイント", "ダメージボーナス",]
         self.entries = {}
 
         for i, status in enumerate(self.status_list):
@@ -40,17 +40,19 @@ class main:
             command=self.add_skills_window).grid(row=len(self.status_list) + 1,
             column=0)
 
+        if name != "":
+            self.setvalues(name)
 
         status_window.mainloop()
 
     def save_character_status(self):
-        name = self.entries["name"].get()
+        self.new_name = self.entries["name"].get()
 
-        with open(fr"{self.characters_dir}/{name}.json", "w", encoding="utf-8") as f:
+        with open(fr"{self.characters_dir}/{self.new_name}.json", "w", encoding="utf-8") as f:
             status = {}
             for key, c in zip(self.status_list, self.entries.values()):
                 status[key] = c.get()
-            json.dump(status, f, ensure_ascii=False)
+            json.dump({"base":status}, f, ensure_ascii=False)
 
     def load_character_status(self, name):
         try:
@@ -63,6 +65,15 @@ class main:
         add_skills_window = tkinter.Tk()
         add_skills_window.title("技能を追加")
 
+    def setvalues(self, name):
+        status = self.load_character_status(name)
+        if status != None:
+            for entry, c in zip(self.entries.values(), list(status["base"].values())):
+                entry.insert(0, c)
+        else:
+            for entry in self.entries.values():
+                entry.insert(0, "0")
+
         # pagenum = 0
         # for c in self.pageddata[pagenum]:
         #     cvs = tkinter.Canvas()
@@ -71,7 +82,7 @@ class main:
         #     tkinter.Label(text=c, font=self.default_font).grid(row=0, column=0)
         #     tkinter.Label(text=self.skills_dict[c], font=self.default_font)
 
-        add_skills_window.mainloop()
+        # add_skills_window.mainloop()
 
 
     # # キャラクターステータスをJSONから読み込み、エントリーにセットする関数

@@ -3,10 +3,11 @@ import threading
 import csv
 import time
 import random
-import glob
-from pathlib import Path
-import os
+# import glob
+# from pathlib import Path
+# import os
 
+import characterSelect
 
 
 # ダイスを振る、チャットをするウィンドウのプログラム
@@ -61,7 +62,7 @@ class main:
 
         # ダイス保存とかの機能
         self.savedice_canvas = tkinter.Canvas()
-        self.savedice_canvas.pack(side="left", anchor="n")
+        self.savedice_canvas.pack(side="top", anchor="w")
 
         tkinter.Label(self.savedice_canvas, text="保存したダイス", font=self.default_font).pack(anchor="e")
 
@@ -95,25 +96,43 @@ class main:
 
         self.window.bind("<KeyPress>", self.type_event)
 
-        edit_character_button = tkinter.Button(main_canvas, text="キャラクターステータスを編集", command=lambda:self.status_window(self.default_font, self.appdata_dir))
+        edit_character_button = tkinter.Button(main_canvas, text="キャラクターステータスを編集", command=lambda:self.status_window(self.default_font, self.appdata_dir, self.playername_entry.get()))
         edit_character_button.pack()
     
         # キャラクター選択画面に移動するボタン
-        select_character_button = tkinter.Button(main_canvas, text="キャラクターを選択", command=self.open_character_select)
+        select_character_button = tkinter.Button(main_canvas, text="キャラクターを選択", command=self.show_change_account)
         select_character_button.pack()
+
+        # 今のキャラクターを表示しとくやつ
+        playername_canvas = tkinter.Canvas()
+        playername_canvas.pack(side="bottom", anchor="e")
+
+        self.playername_entry = tkinter.Entry(playername_canvas, state="readonly", font=self.default_font, justify=tkinter.RIGHT)
+        self.playername_entry.pack(side="bottom", anchor="e")
+
+        tkinter.Label(playername_canvas, text="現在のプレイヤー:", font=self.default_font).pack(side="bottom", anchor="e")
 
         self.window.protocol("WM_DELETE_WINDOW", self.window_close)
         self.window.mainloop()
     
-    def open_character_select(self):
-        self.window.destroy()
-        CharacterSelect(self.appdata_dir, self.default_font, self.on_character_selected)
+    # def open_character_select(self):
+    #     self.window.destroy()
+    #     CharacterSelect(self.appdata_dir, self.default_font, self.on_character_selected)
 
 
-    def on_character_selected(self, character_name):
-        print(f"選択されたキャラクター: {character_name}")
+    # def on_character_selected(self, character_name):
+    #     print(f"選択されたキャラクター: {character_name}")
         
-        self.__init__(self.soc, self.default_font, self.status_window, self.dataPaths, self.appdata_dir) 
+    #     self.__init__(self.soc, self.default_font, self.status_window, self.dataPaths, self.appdata_dir) 
+
+    def change_playername(self, name):
+        self.playername_entry.configure(state="normal")
+        self.playername_entry.delete(0, tkinter.END)
+        self.playername_entry.insert(0, name)
+        self.playername_entry.configure(state="readonly")
+
+    def show_change_account(self):
+        self.character_select = characterSelect.main(self.appdata_dir, self.default_font, self.change_playername)
 
     def diceroll(self, d="", f=""):
         D_count = int(self.D_countBox.get())
@@ -125,7 +144,7 @@ class main:
         cache = []
         for _ in range(D_count):
             cache.append(random.randint(1, F_count))
-        self.soc.send(f"{sum(cache)} ({'+'.join(map(str, cache))})-{D_count}D{F_count}".encode())
+        self.soc.send(f"({self.playername_entry.get()}){sum(cache)} ({'+'.join(map(str, cache))})-{D_count}D{F_count}".encode())
 
     def private_diceroll(self):
         D_count = int(self.D_countBox.get())
@@ -181,7 +200,7 @@ class main:
             if msg.startswith("/"):
                 self.handle_command(str(msg))
             else:
-                self.soc.send(f"「{msg}」".encode())
+                self.soc.send(f"({self.playername_entry.get()})「{msg}」".encode())
             self.chatentry.delete(0, tkinter.END)
 
     def insert_to_log(self, txt):
@@ -217,7 +236,6 @@ class main:
                 break
 
     def type_event(self, event):
-        print(event.keysym)
         match str(event.keysym):
             case "Return":
                 if str(self.window.focus_get()) == ".!frame.!entry":
@@ -270,10 +288,9 @@ class main:
         exit()
 
     def clear(self):
-        print("clear")
         self.logbox.configure(state="normal")
         self.logbox.delete('1.0', tkinter.END)
-        self.logbox.insert(tkinter.END, "システム:ログの履歴を削��しました\n")
+        self.logbox.insert(tkinter.END, "システム:ログの履歴を削除しました\n")
         self.logbox.configure(state="disabled")
 
     # コマンドハンドラを登録する関数
@@ -283,8 +300,6 @@ class main:
 
 # コマンドを処理する関数
     def handle_command(self, command):
-        print(command)
-        print(self.command_handlers)
         handler = self.command_handlers[command]
         if handler:
             handler()
@@ -293,27 +308,27 @@ class main:
     def clear_log(self):
         self.clear()
     
-class CharacterSelect:
-    def __init__(self, appdata_dir, default_font, on_character_selected):
-        self.default_font = default_font
-        self.on_character_selected = on_character_selected  # コールバック関数
+# class CharacterSelect:
+#     def __init__(self, appdata_dir, default_font, on_character_selected):
+#         self.default_font = default_font
+#         self.on_character_selected = on_character_selected  # コールバック関数
 
-        characters = [os.path.splitext(os.path.basename(file))[0] for file in glob.glob(str(Path(fr"{appdata_dir}/characters/*")))]
+#         characters = [os.path.splitext(os.path.basename(file))[0] for file in glob.glob(str(Path(fr"{appdata_dir}/characters/*")))]
 
-        self.window = tkinter.Tk()
-        self.window.title("キャラクター選択")
+#         self.window = tkinter.Tk()
+#         self.window.title("キャラクター選択")
 
-        tkinter.Label(self.window, text="~キャラクターを選択~", font=default_font).pack()
-        self.buttons = tkinter.Canvas(self.window)
-        self.buttons.pack()
-        for c in characters:
-            self.add_select_button(c)
+#         tkinter.Label(self.window, text="~キャラクターを選択~", font=default_font).pack()
+#         self.buttons = tkinter.Canvas(self.window)
+#         self.buttons.pack()
+#         for c in characters:
+#             self.add_select_button(c)
 
-        self.window.mainloop()
+#         self.window.mainloop()
 
-    def set_character_name(self, name):
-        self.on_character_selected(name)  # コールバック関数を呼び出し
-        self.window.destroy()  # キャラクター選択ウィンドウを閉じる
+#     def set_character_name(self, name):
+#         self.on_character_selected(name)  # コールバック関数を呼び出し
+#         self.window.destroy()  # キャラクター選択ウィンドウを閉じる
 
-    def add_select_button(self, txt):
-        tkinter.Button(self.buttons, text=txt, command=lambda: self.set_character_name(txt), font=self.default_font).pack(side="left")
+#     def add_select_button(self, txt):
+#         tkinter.Button(self.buttons, text=txt, command=lambda: self.set_character_name(txt), font=self.default_font).pack(side="left")
