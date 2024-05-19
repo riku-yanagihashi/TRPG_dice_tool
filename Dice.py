@@ -2,8 +2,6 @@ import socket
 import os
 from pathlib import Path
 import platform
-import threading
-import time
 
 import mainwindow
 import nameset
