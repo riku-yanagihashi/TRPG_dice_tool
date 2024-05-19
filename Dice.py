@@ -111,7 +111,6 @@ def diceroll(d="", f=""):
     for _ in range(D_count):
         cache.append(random.randint(1, F_count))
     soc.send(f"{sum(cache)} ({'+'.join(map(str, cache))})-{D_count}D{F_count}".encode())
-    print(sum(cache), "+".join(map(str, cache)))
 
 def private_diceroll():
     D_count = int(D_countBox.get())
@@ -120,7 +119,6 @@ def private_diceroll():
     for _ in range(D_count):
         cache.append(random.randint(1, F_count))
     result = f"プライベートロール: {sum(cache)} ({'+'.join(map(str, cache))})-{D_count}D{F_count}"
-    print(result)
     insert_to_log(result)
 
 dice_button = tkinter.Button(dicecanvas, text="ダイスを振る", command=diceroll)
@@ -151,8 +149,6 @@ def addsaveddice(id, D, F):
         with open(dataPaths["saveddice"]) as f:
             reader = csv.reader(f)
             rowdata = [c for c in reader if c != [] and c[0] != str(id)]
-            print(rowdata)
-            print(type(rowdata))
             with open(dataPaths["saveddice"], "w") as f2:
                 writer = csv.writer(f2)
                 for c in rowdata:
@@ -164,7 +160,6 @@ def addsaveddice(id, D, F):
 def savedice():
     D_count = int(D_countBox.get())
     F_count = int(F_countBox.get())
-    print(saved_dices)
     try:
         id = max(list(saved_dices.keys()))+1
     except ValueError:
