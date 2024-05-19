@@ -8,7 +8,8 @@ import random
 
 # ダイスを振る、チャットをするウィンドウのプログラム
 class main:
-    def __init__(self, soc, default_font, status_window, handle_command, dataPaths, appdata_dir):
+    command_handlers = {}
+    def __init__(self, soc, default_font, status_window, dataPaths, appdata_dir):
         self.soc = soc
         self.dataPaths = dataPaths
         self.appdata_dir = appdata_dir
@@ -17,7 +18,8 @@ class main:
         self.saved_dices = {}
 
         self.status_window = status_window
-        self.handle_command = handle_command
+
+        self.register_command("/clear", self.clear_log)
 
         # csvからセーブ済みのダイスをロード
         with open(self.dataPaths["saveddice"]) as f:
@@ -159,7 +161,7 @@ class main:
         msg = self.chatentry.get()
         if msg != "":
             if msg.startswith("/"):
-                self.handle_command(msg)
+                self.handle_command(str(msg))
             else:
                 self.soc.send(f"「{msg}」".encode())
             self.chatentry.delete(0, tkinter.END)
@@ -241,7 +243,25 @@ class main:
         exit()
 
     def clear(self):
+        print("clear")
         self.logbox.configure(state="normal")
         self.logbox.delete('1.0', tkinter.END)
         self.logbox.insert(tkinter.END, "システム:ログの履歴を削除しました\n")
         self.logbox.configure(state="disabled")
+
+    # コマンドハンドラを登録する関数
+    def register_command(self, command, handler):
+        time.sleep(1)
+        self.command_handlers[command] = handler
+
+# コマンドを処理する関数
+    def handle_command(self, command):
+        print(command)
+        print(self.command_handlers)
+        handler = self.command_handlers[command]
+        if handler:
+            handler()
+
+    # コマンドハンドラにclear_logを登録
+    def clear_log(self):
+        self.clear()
