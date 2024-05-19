@@ -7,13 +7,13 @@ import os
 from pathlib import Path
 import csv
 import platform
-
+import tkinter.messagebox
+import json
 
 saved_dices = {}
-
 default_font = ("Arial", 14)
 
-# ↓アプリケーションのデータを保存するフォルダのセットアップ
+# アプリケーションのデータ保存フォルダのセットアップ
 match platform.system():
     case "Windows":
         appdata_dir = fr"{Path(os.getenv('APPDATA')).parent}\\Local\\DiceApp\\"
@@ -25,11 +25,11 @@ except FileExistsError:
     pass
 
 dataPaths = {
-    "saveddice":Path(fr"{appdata_dir}\\savedDice.csv")
+    "saveddice": Path(fr"{appdata_dir}\\savedDice.csv")
 }
 
 for c in dataPaths.values():
-    c:Path
+    c: Path
     if not c.exists():
         c.touch()
 
@@ -40,15 +40,14 @@ with open(dataPaths["saveddice"]) as f:
         if c != []:
             saved_dices[int(c[0])] = (int(c[1]), int(c[2]))
 
-# ↓サーバーへの接続プログラム===================
+# サーバーへの接続プログラム
 soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 soc.connect(("127.0.0.1", 60013))
 
 # プレイヤーの色を保存する変数
 player_color = None
 
-# ↓コマンドハンドラの処理========================================
-# コマンドハンドラの辞書
+# コマンドハンドラの処理
 command_handlers = {}
 
 # コマンドハンドラを登録する関数
@@ -64,38 +63,42 @@ def handle_command(command):
 def clear_log():
     logbox.configure(state="normal")
     logbox.delete('1.0', tkinter.END)
-    logbox.insert(tkinter.END,"システム:ログの履歴を削除しました\n")
+    logbox.insert(tkinter.END, "システム:ログの履歴を削除しました\n")
     logbox.configure(state="disabled")
-
-# ↑====================================================================
 
 # コマンドハンドラにclear_logを登録
 register_command("/clear", clear_log)
 
-# ↓名前を決めるウィンドウのプログラム=============
-
+# 名前を決めるウィンドウのプログラム
 namewindow = tkinter.Tk()
-
 tkinter.Label(text="名前を入力してください", font=default_font).pack()
-
 nameentry = tkinter.Entry(font=default_font)
 nameentry.pack()
 
 def enter():
-    soc.send(nameentry.get().encode())
-    namewindow.destroy()
+    name = nameentry.get()
+    if name == "":
+        tkinter.messagebox.showwarning(title="警告", message="名前を入力してください。")
+    else:
+        soc.send(nameentry.get().encode())
+        namewindow.destroy()
 
 tkinter.Button(text="決定", command=enter).pack()
 
+def name_close():
+    namewindow.destroy()
+    soc.close()
+    exit()
+
+namewindow.protocol("WM_DELETE_WINDOW", name_close)
 namewindow.mainloop()
 
-# ↓ダイスを振る、チャットをするウィンドウのプログラム===========
-
+# ダイスを振る、チャットをするウィンドウのプログラム
 window = tkinter.Tk()
 window.title("ダイス")
 
 main_canvas = tkinter.Canvas()
-main_canvas.pack(side="left",anchor="n")
+main_canvas.pack(side="left", anchor="n")
 
 dicecanvas = tkinter.Canvas(main_canvas)
 dicecanvas.pack()
@@ -137,7 +140,6 @@ dice_button = tkinter.Button(dicecanvas, text="ダイスを振る", command=dice
 dice_button.pack(side="left", anchor="n")
 
 private_dice_button = tkinter.Button(dicecanvas, text="プライベートダイスを振る", command=private_diceroll)
-private_dice_button.pack(side="left", anchor="n")
 
 # ダイス保存とかの機能
 savedice_canvas = tkinter.Canvas()
@@ -147,7 +149,7 @@ tkinter.Label(savedice_canvas, text="保存したダイス", font=default_font).
 
 def addsaveddice(id, D, F):
     diceval_canvas = tkinter.Canvas(savedice_canvas)
-    diceval_canvas.pack(side="top",anchor="n")
+    diceval_canvas.pack(side="top", anchor="n")
 
     diceval_entry = tkinter.Entry(diceval_canvas, font=default_font)
     diceval_entry.insert(0, f"{D}D{F}")
@@ -223,25 +225,27 @@ def insert_to_log(txt):
     logbox.configure(state="disabled")
     logbox.see("end")
 
-
 def rcv():
     global player_color
     while True:
         time.sleep(0.1)
-        txt = soc.recv(2048).decode()
-        if txt.startswith("色: "):
-            player_color = txt.split("色: ")[1]
-            logbox.tag_configure(player_color, foreground=player_color)
-        else:
-            # メッセージに色のタグをつける
-            if "::" in txt:
-                log_parts = txt.split("::")
-                color = log_parts[1]
-                if color not in logbox.tag_names():
-                    logbox.tag_configure(color, foreground=color)
-                insert_to_log(txt)
+        try:
+            txt = soc.recv(2048).decode()
+            if txt.startswith("色: "):
+                player_color = txt.split("色: ")[1]
+                logbox.tag_configure(player_color, foreground=player_color)
             else:
-                insert_to_log(txt)
+                # メッセージに色のタグをつける
+                if "::" in txt:
+                    log_parts = txt.split("::")
+                    color = log_parts[1]
+                    if color not in logbox.tag_names():
+                        logbox.tag_configure(color, foreground=color)
+                    insert_to_log(txt)
+                else:
+                    insert_to_log(txt)
+        except Exception:
+            break
 
 threading.Thread(target=rcv).start()
 
@@ -273,4 +277,117 @@ change_name_button.pack()
 
 window.bind("<KeyPress>", type_event)
 
+# キャラクターステータスをロードする関数
+def load_character_status(name):
+    try:
+        with open(f"{name}.json", "r", encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return None
+
+# キャラクターステータスを保存する関数
+def save_character_status(character_status):
+    json_file_path = dataPaths["saveddice"].parent / f"character_{len(saved_dices) + 1}.json"
+    with open(json_file_path, "w", encoding="utf-8") as f:
+        json.dump(character_status, f, ensure_ascii=False)
+
+# キャラクターステータスをJSONから読み込み、エントリーにセットする関数
+def set_character_status_entries(name_entry, san_entry, str_entry, dex_entry, int_entry, con_entry, pow_entry, app_entry, siz_entry, edu_entry, luck_entry):
+    character_status = load_character_status(name_entry.get())
+    if character_status:
+        name_entry.insert(0, character_status.get("name", ""))
+        san_entry.insert(0, character_status.get("SAN", ""))
+        str_entry.insert(0, character_status.get("STR", ""))
+        dex_entry.insert(0, character_status.get("DEX", ""))
+        int_entry.insert(0, character_status.get("INT", ""))
+        con_entry.insert(0, character_status.get("CON", ""))
+        pow_entry.insert(0, character_status.get("POW", ""))
+        app_entry.insert(0, character_status.get("APP", ""))
+        siz_entry.insert(0, character_status.get("SIZ", ""))
+        edu_entry.insert(0, character_status.get("EDU", ""))
+        luck_entry.insert(0, character_status.get("LUCK", ""))
+
+
+
+# クライアントUIのメインウィンドウのプログラム
+def main_window():
+    window = tkinter.Tk()
+    window.title("キャラクターステータス編集")
+
+    default_font = ("Arial", 14)
+
+    tkinter.Label(window, text="名前:", font=default_font).grid(row=0, column=0)
+    name_entry = tkinter.Entry(window, font=default_font)
+    name_entry.grid(row=0, column=1)
+
+    tkinter.Label(window, text="SAN:", font=default_font).grid(row=1, column=0)
+    san_entry = tkinter.Entry(window, font=default_font)
+    san_entry.grid(row=1, column=1)
+
+    tkinter.Label(window, text="STR:", font=default_font).grid(row=2, column=0)
+    str_entry = tkinter.Entry(window, font=default_font)
+    str_entry.grid(row=2, column=1)
+
+    tkinter.Label(window, text="DEX:", font=default_font).grid(row=3, column=0)
+    dex_entry = tkinter.Entry(window, font=default_font)
+    dex_entry.grid(row=3, column=1)
+
+    tkinter.Label(window, text="INT:", font=default_font).grid(row=4, column=0)
+    int_entry = tkinter.Entry(window, font=default_font)
+    int_entry.grid(row=4, column=1)
+
+    tkinter.Label(window, text="CON:", font=default_font).grid(row=5, column=0)
+    con_entry = tkinter.Entry(window, font=default_font)
+    con_entry.grid(row=5, column=1)
+
+    tkinter.Label(window, text="POW:", font=default_font).grid(row=6, column=0)
+    pow_entry = tkinter.Entry(window, font=default_font)
+    pow_entry.grid(row=6, column=1)
+
+    tkinter.Label(window, text="APP:", font=default_font).grid(row=7, column=0)
+    app_entry = tkinter.Entry(window, font=default_font)
+    app_entry.grid(row=7, column=1)
+
+    tkinter.Label(window, text="SIZ:", font=default_font).grid(row=8, column=0)
+    siz_entry = tkinter.Entry(window, font=default_font)
+    siz_entry.grid(row=8, column=1)
+
+    tkinter.Label(window, text="EDU:", font=default_font).grid(row=9, column=0)
+    edu_entry = tkinter.Entry(window, font=default_font)
+    edu_entry.grid(row=9, column=1)
+
+    tkinter.Label(window, text="LUCK:", font=default_font).grid(row=10, column=0)
+    luck_entry = tkinter.Entry(window, font=default_font)
+    luck_entry.grid(row=10, column=1)
+
+    # キャラクターステータスをロードしてエントリーにセット
+    set_character_status_entries(name_entry, san_entry, str_entry, dex_entry, int_entry, con_entry, pow_entry, app_entry, siz_entry, edu_entry, luck_entry)
+
+    # 保存ボタンを追加
+    tkinter.Button(window, text="保存", command=lambda: save_character_status({
+        "name": name_entry.get(),
+        "SAN": san_entry.get(),
+        "STR": str_entry.get(),
+        "DEX": dex_entry.get(),
+        "INT": int_entry.get(),
+        "CON": con_entry.get(),
+        "POW": pow_entry.get(),
+        "APP": app_entry.get(),
+        "SIZ": siz_entry.get(),
+        "EDU": edu_entry.get(),
+        "LUCK": luck_entry.get()
+    })).grid(row=11, column=0)
+
+    window.mainloop()
+
+edit_character_button = tkinter.Button(main_canvas, text="キャラクターステータスを編集", command=main_window)
+edit_character_button.pack()
+
+# ============================================================
+def window_close():
+    window.destroy()
+    soc.close()
+    exit()
+
+window.protocol("WM_DELETE_WINDOW", window_close)
 window.mainloop()
