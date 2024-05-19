@@ -208,8 +208,10 @@ class main:
             case "t":
                 self.chatentry.focus_set()
             case "slash":
-                self.chatentry.focus_set()
-                self.chatentry.insert(tkinter.END, '/')
+                if str(self.window.focus_get()) != ".!frame.!entry":
+                    self.chatentry.focus_set()
+                else:
+                    self.chatentry.insert(tkinter.END, '/')
 
     # コマンドのヘルプを追加する
     def show_help(self):
