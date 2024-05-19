@@ -30,6 +30,12 @@ for c in dataPaths.values():
     if not c.exists():
         c.touch()
 
+# キャラクターデータを保存するフォルダの作成
+try:
+    os.makedirs(fr"{appdata_dir}/characters/")
+except FileExistsError:
+    pass
+
 # サーバーへの接続プログラム
 soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 soc.connect(("127.0.0.1", 60013))
@@ -58,6 +64,6 @@ def clear_log():
 register_command("/clear", clear_log)
 
 
-mainclass = mainwindow.main(soc, default_font, statuswindow.main, handle_command, dataPaths)
+mainclass = mainwindow.main(soc, default_font, statuswindow.main, handle_command, dataPaths, appdata_dir)
 # ============================================================
 
