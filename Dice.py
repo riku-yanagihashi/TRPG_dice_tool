@@ -11,6 +11,19 @@ soc.connect(("127.0.0.1", 60013))
 # プレイヤーの色を保存する変数
 player_color = None
 
+# コマンドハンドラの辞書
+command_handlers = {}
+
+# コマンドハンドラを登録する関数
+def register_command(command, handler):
+    command_handlers[command] = handler
+
+# コマンドを処理する関数
+def handle_command(command):
+    handler = command_handlers.get(command)
+    if handler:
+        handler()
+
 # ↓名前を決めるウィンドウのプログラム=============
 
 namewindow = tkinter.Tk()
@@ -87,8 +100,8 @@ chatentry.pack(anchor="w", side="left")
 def sendmessage():
     msg = chatentry.get()
     if msg != "":
-        if msg == "/clear":
-            clear_log()
+        if msg.startswith("/"):
+            handle_command(msg)
         else:
             soc.send(f"「{msg}」".encode())
         chatentry.delete(0, tkinter.END)
@@ -111,6 +124,9 @@ def clear_log():
     logbox.configure(state="normal")
     logbox.delete('1.0', tkinter.END)
     logbox.configure(state="disabled")
+
+# コマンドハンドラにclear_logを登録
+register_command("/clear", clear_log)
 
 def rcv():
     global player_color
