@@ -97,6 +97,13 @@ def name_close():
     soc.close()
     exit()
 
+def name_type_event(event):
+    if str(namewindow.focus_get()) == ".!entry" and str(event.keysym) == "Return":
+        enter()
+namewindow.bind("<KeyPress>", name_type_event)
+
+nameentry.focus_set()
+
 namewindow.protocol("WM_DELETE_WINDOW", name_close)
 namewindow.mainloop()
 
@@ -165,7 +172,7 @@ def addsaveddice(id, D, F):
     diceval_entry.configure(state="readonly")
     diceval_entry.pack(side="left")
 
-    roll_button = tkinter.Button(diceval_canvas, text="振る", command=lambda:diceroll(D, F))
+    roll_button = tkinter.Button(diceval_canvas, text="振る", command=lambda:diceroll(D, F), font=("Arial", 10))
     roll_button.pack(side="left")
 
     def delcanvas(id):
@@ -268,6 +275,7 @@ def type_event(event):
 # 名前を変更するときに出る新しいウィンドウとそのための関数
 def change_name():
     changewindow = tkinter.Toplevel()
+
     tkinter.Label(changewindow, text="新しい名前を入力してください", font=default_font).pack()
 
     new_name_entry = tkinter.Entry(changewindow, font=default_font)
@@ -280,6 +288,14 @@ def change_name():
             changewindow.destroy()
 
     tkinter.Button(changewindow, text="名前を変更", command=submit_new_name).pack()
+
+    def changewindow_type_event(event):
+        if str(event.keysym) == "Return" and str(changewindow.focus_get()) == ".!toplevel.!entry":
+            submit_new_name()
+
+    new_name_entry.focus_set()
+
+    changewindow.bind("<KeyPress>", changewindow_type_event)
 
 # 名前変更ボタンを追加
 change_name_button = tkinter.Button(main_canvas, text="名前を変更", command=change_name)
