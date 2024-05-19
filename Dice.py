@@ -6,6 +6,7 @@ import random
 import os
 from pathlib import Path
 import csv
+import platform
 
 
 saved_dices = {}
@@ -13,7 +14,11 @@ saved_dices = {}
 default_font = ("Arial", 14)
 
 # ↓アプリケーションのデータを保存するフォルダのセットアップ
-appdata_dir = fr"{Path(os.getenv('APPDATA')).parent}\\Local\\DiceApp\\"
+match platform.system():
+    case "Windows":
+        appdata_dir = fr"{Path(os.getenv('APPDATA')).parent}\\Local\\DiceApp\\"
+    case "Darwin":
+        appdata_dir = fr"{os.environ['HOME']}/Library/Application Support/DiceApp/"
 try:
     os.makedirs(appdata_dir)
 except FileExistsError:
@@ -22,6 +27,11 @@ except FileExistsError:
 dataPaths = {
     "saveddice":Path(fr"{appdata_dir}\\savedDice.csv")
 }
+
+for c in dataPaths.values():
+    c:Path
+    if not c.exists():
+        c.touch()
 
 # csvからセーブ済みのダイスをロード
 with open(dataPaths["saveddice"]) as f:
@@ -166,8 +176,6 @@ def savedice():
     saved_dices[id] = (D_count, F_count)
     addsaveddice(id, D_count, F_count)
 
-    if not dataPaths["saveddice"].exists():
-        dataPaths["saveddice"].touch()
     with open(dataPaths["saveddice"], "a") as f:
         writer = csv.writer(f)
         writer.writerow([str(id), D_count, F_count])
