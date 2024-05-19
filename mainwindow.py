@@ -77,6 +77,9 @@ class main:
         sendbutton.pack(anchor="w", side="left")
         chatframe.pack()
 
+
+        self.window.bind("<Return>", lambda event: self.sendmessage())
+
         threading.Thread(target=self.rcv).start()
 
         # 名前変更ボタンを追加
