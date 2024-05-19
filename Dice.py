@@ -87,7 +87,10 @@ chatentry.pack(anchor="w", side="left")
 def sendmessage():
     msg = chatentry.get()
     if msg != "":
-        soc.send(f"「{msg}」".encode())
+        if msg == "/clear":
+            clear_log()
+        else:
+            soc.send(f"「{msg}」".encode())
         chatentry.delete(0, tkinter.END)
 
 sendbutton = tkinter.Button(chatframe, text="送信", command=sendmessage)
@@ -103,6 +106,11 @@ def insert_to_log(txt):
         logbox.insert(tkinter.END, f"{txt}\n")
     logbox.configure(state="disabled")
     logbox.see("end")
+
+def clear_log():
+    logbox.configure(state="normal")
+    logbox.delete('1.0', tkinter.END)
+    logbox.configure(state="disabled")
 
 def rcv():
     global player_color
