@@ -37,6 +37,7 @@ soc.connect(("127.0.0.1", 60013))
 # プレイヤーの色を保存する変数
 player_color = None
 
+# ↓コマンドハンドラの処理========================================
 # コマンドハンドラの辞書
 command_handlers = {}
 
@@ -55,6 +56,8 @@ def clear_log():
     logbox.delete('1.0', tkinter.END)
     logbox.insert(tkinter.END,"システム:ログの履歴を削除しました\n")
     logbox.configure(state="disabled")
+
+# ↑====================================================================
 
 # コマンドハンドラにclear_logを登録
 register_command("/clear", clear_log)
