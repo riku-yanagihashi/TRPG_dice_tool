@@ -24,6 +24,14 @@ def handle_command(command):
     if handler:
         handler()
 
+def clear_log():
+    logbox.configure(state="normal")
+    logbox.delete('1.0', tkinter.END)
+    logbox.configure(state="disabled")
+
+# コマンドハンドラにclear_logを登録
+register_command("/clear", clear_log)
+
 # ↓名前を決めるウィンドウのプログラム=============
 
 namewindow = tkinter.Tk()
@@ -120,13 +128,6 @@ def insert_to_log(txt):
     logbox.configure(state="disabled")
     logbox.see("end")
 
-def clear_log():
-    logbox.configure(state="normal")
-    logbox.delete('1.0', tkinter.END)
-    logbox.configure(state="disabled")
-
-# コマンドハンドラにclear_logを登録
-register_command("/clear", clear_log)
 
 def rcv():
     global player_color
