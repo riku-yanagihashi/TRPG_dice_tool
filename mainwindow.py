@@ -196,15 +196,12 @@ class main:
                 break
 
     def type_event(self, event):
-        if event.keysym == "/":
-            self.chatentry.focus_set()
-        else:
-            match str(event.keysym):
-                case "Return":
-                    if str(self.window.focus_get()) == ".!frame.!entry":
-                        self.sendmessage()
-                case "t":
-                    self.chatentry.focus_set()
+        match str(event.keysym):
+            case "Return":
+                if str(self.window.focus_get()) == ".!frame.!entry":
+                    self.sendmessage()
+            case "t":
+                self.chatentry.focus_set()
 
 
 
