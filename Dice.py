@@ -87,6 +87,12 @@ def enter():
 
 tkinter.Button(text="決定", command=enter).pack()
 
+def name_close():
+    namewindow.destroy()
+    soc.close()
+    exit()
+
+namewindow.protocol("WM_DELETE_WINDOW", name_close)
 namewindow.mainloop()
 
 # ↓ダイスを振る、チャットをするウィンドウのプログラム===========
@@ -228,20 +234,23 @@ def rcv():
     global player_color
     while True:
         time.sleep(0.1)
-        txt = soc.recv(2048).decode()
-        if txt.startswith("色: "):
-            player_color = txt.split("色: ")[1]
-            logbox.tag_configure(player_color, foreground=player_color)
-        else:
-            # メッセージに色のタグをつける
-            if "::" in txt:
-                log_parts = txt.split("::")
-                color = log_parts[1]
-                if color not in logbox.tag_names():
-                    logbox.tag_configure(color, foreground=color)
-                insert_to_log(txt)
+        try:
+            txt = soc.recv(2048).decode()
+            if txt.startswith("色: "):
+                player_color = txt.split("色: ")[1]
+                logbox.tag_configure(player_color, foreground=player_color)
             else:
-                insert_to_log(txt)
+                # メッセージに色のタグをつける
+                if "::" in txt:
+                    log_parts = txt.split("::")
+                    color = log_parts[1]
+                    if color not in logbox.tag_names():
+                        logbox.tag_configure(color, foreground=color)
+                    insert_to_log(txt)
+                else:
+                    insert_to_log(txt)
+        except Exception:
+            break
 
 threading.Thread(target=rcv).start()
 
@@ -273,4 +282,10 @@ change_name_button.pack()
 
 window.bind("<KeyPress>", type_event)
 
+def window_close():
+    window.destroy()
+    soc.close()
+    exit()
+
+window.protocol("WM_DELETE_WINDOW", window_close)
 window.mainloop()
