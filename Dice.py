@@ -27,6 +27,7 @@ def handle_command(command):
 def clear_log():
     logbox.configure(state="normal")
     logbox.delete('1.0', tkinter.END)
+    logbox.insert(tkinter.END,"システム:ログの履歴を削除しました\n")
     logbox.configure(state="disabled")
 
 # コマンドハンドラにclear_logを登録
