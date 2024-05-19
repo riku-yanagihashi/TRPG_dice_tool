@@ -23,6 +23,7 @@ class main:
         self.status_window = status_window
 
         self.register_command("/clear", self.clear_log)
+        self.register_command("/c", self.clear_log)
         self.register_command("/help", self.show_help)
 
         # csvからセーブ済みのダイスをロード
@@ -112,7 +113,7 @@ class main:
 
     def on_character_selected(self, character_name):
         print(f"選択されたキャラクター: {character_name}")
-        
+
         self.__init__(self.soc, self.default_font, self.status_window, self.dataPaths, self.appdata_dir) 
 
     def diceroll(self, d="", f=""):
