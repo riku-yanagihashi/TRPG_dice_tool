@@ -20,6 +20,7 @@ class main:
         self.status_window = status_window
 
         self.register_command("/clear", self.clear_log)
+        self.register_command("/help", self.show_help)
 
         # csvからセーブ済みのダイスをロード
         with open(self.dataPaths["saveddice"]) as f:
@@ -210,7 +211,14 @@ class main:
                 self.chatentry.focus_set()
                 self.chatentry.insert(tkinter.END, '/')
 
-
+    # コマンドのヘルプを追加する
+    def show_help(self):
+        help_text = """
+        コマンド一覧:
+        /clear - チャットログをクリアする
+        /help - コマンドのヘルプを表示する
+        """
+        self.insert_to_log(help_text)
 
 # 名前を変更するときに出る新しいウィンドウとそのための関数
     def change_name(self):
@@ -246,7 +254,7 @@ class main:
         print("clear")
         self.logbox.configure(state="normal")
         self.logbox.delete('1.0', tkinter.END)
-        self.logbox.insert(tkinter.END, "システム:ログの履歴を削除しました\n")
+        self.logbox.insert(tkinter.END, "システム:ログの履歴を削��しました\n")
         self.logbox.configure(state="disabled")
 
     # コマンドハンドラを登録する関数
