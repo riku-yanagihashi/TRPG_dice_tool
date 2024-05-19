@@ -121,7 +121,6 @@ class main:
     #     CharacterSelect(self.appdata_dir, self.default_font, self.on_character_selected)
 
 
-<<<<<<< HEAD
     # def on_character_selected(self, character_name):
     #     print(f"選択されたキャラクター: {character_name}")
         
@@ -135,12 +134,6 @@ class main:
 
     def show_change_account(self):
         self.character_select = characterSelect.main(self.appdata_dir, self.default_font, self.change_playername)
-=======
-    def on_character_selected(self, character_name):
-        print(f"選択されたキャラクター: {character_name}")
-
-        self.__init__(self.soc, self.default_font, self.status_window, self.dataPaths, self.appdata_dir) 
->>>>>>> b68891b084579a28542a07294cf1d7abfb2be0bf
 
     def diceroll(self, d="", f=""):
         D_count = int(self.D_countBox.get())
