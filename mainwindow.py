@@ -3,8 +3,9 @@ import threading
 import csv
 import time
 import random
+import json
 # import glob
-# from pathlib import Path
+from pathlib import Path
 # import os
 
 import characterSelect
@@ -13,6 +14,7 @@ import characterSelect
 # ダイスを振る、チャットをするウィンドウのプログラム
 class main:
     command_handlers = {}
+
     def __init__(self, soc, default_font, status_window, dataPaths, appdata_dir):
         self.soc = soc
         self.dataPaths = dataPaths
@@ -23,9 +25,10 @@ class main:
 
         self.status_window = status_window
 
-        self.register_command("/clear", self.clear_log)
-        self.register_command("/c", self.clear_log)
-        self.register_command("/help", self.show_help)
+        self.register_command("/clear", self.clear_log, "チャットログをクリアする")
+        self.register_command("/c", self.clear_log, show_in_help=False)
+        self.register_command("/help", self.show_help, "コマンドのヘルプを表示する")
+        self.register_command("/load", self.load_status, "指定されたステータス情報を表示する")
 
         # csvからセーブ済みのダイスをロード
         with open(self.dataPaths["saveddice"]) as f:
@@ -33,7 +36,6 @@ class main:
             for c in reader:
                 if c != []:
                     self.saved_dices[int(c[0])] = (int(c[1]), int(c[2]))
-
 
         self.window = tkinter.Tk()
         self.window.title("ダイス")
@@ -44,74 +46,90 @@ class main:
         dicecanvas = tkinter.Canvas(main_canvas)
         dicecanvas.pack()
 
-        tkinter.Label(dicecanvas, text="ダイス:", font=self.default_font).pack(side="left", anchor="n")
+        tkinter.Label(dicecanvas, text="ダイス:", font=self.default_font).pack(
+            side="left", anchor="n")
 
-        self.D_countBox = tkinter.Entry(dicecanvas, width=2, font=self.default_font)
+        self.D_countBox = tkinter.Entry(
+            dicecanvas, width=2, font=self.default_font)
         self.D_countBox.insert(0, "1")
         self.D_countBox.pack(side="left", anchor="n")
 
-        tkinter.Label(dicecanvas, text="D", font=self.default_font).pack(side="left", anchor="n")
+        tkinter.Label(dicecanvas, text="D", font=self.default_font).pack(
+            side="left", anchor="n")
 
-        self.F_countBox = tkinter.Entry(dicecanvas, width=8, font=self.default_font)
+        self.F_countBox = tkinter.Entry(
+            dicecanvas, width=8, font=self.default_font)
         self.F_countBox.insert(0, "100")
         self.F_countBox.pack(side="left", anchor="n")
 
-        dice_button = tkinter.Button(dicecanvas, text="ダイスを振る", command=self.diceroll)
+        dice_button = tkinter.Button(
+            dicecanvas, text="ダイスを振る", command=self.diceroll)
         dice_button.pack(side="left", anchor="n")
 
-        tkinter.Button(dicecanvas, text="プライベートダイスを振る", command=self.private_diceroll).pack(side="left", anchor="n")
+        tkinter.Button(dicecanvas, text="プライベートダイスを振る",
+                       command=self.private_diceroll).pack(side="left", anchor="n")
 
         # ダイス保存とかの機能
         self.savedice_canvas = tkinter.Canvas()
         self.savedice_canvas.pack(side="top", anchor="w")
 
-        tkinter.Label(self.savedice_canvas, text="保存したダイス", font=self.default_font).pack(anchor="e")
+        tkinter.Label(self.savedice_canvas, text="保存したダイス",
+                      font=self.default_font).pack(anchor="e")
 
-        tkinter.Button(main_canvas, text="ダイスを保存", command=self.savedice).pack()
+        tkinter.Button(main_canvas, text="ダイスを保存",
+                       command=self.savedice).pack()
 
         for k, c in zip(list(self.saved_dices.keys()), list(self.saved_dices.values())):
             self.addsaveddice(k, c[0], c[1])
 
-        tkinter.Label(main_canvas, text="ログ:", font=self.default_font).pack(anchor="w")
+        tkinter.Label(main_canvas, text="ログ:",
+                      font=self.default_font).pack(anchor="w")
 
-        self.logbox = tkinter.Text(main_canvas, font=self.default_font, state="disabled")
+        self.logbox = tkinter.Text(
+            main_canvas, font=self.default_font, state="disabled")
         self.logbox.pack()
 
         chatframe = tkinter.Frame(main_canvas)
-        tkinter.Label(chatframe, text="チャットを入力:", font=self.default_font).pack(anchor="w", side="left")
+        tkinter.Label(chatframe, text="チャットを入力:", font=self.default_font).pack(
+            anchor="w", side="left")
         self.chatentry = tkinter.Entry(chatframe, font=self.default_font)
         self.chatentry.pack(anchor="w", side="left")
 
-        sendbutton = tkinter.Button(chatframe, text="送信", command=self.sendmessage)
+        sendbutton = tkinter.Button(
+            chatframe, text="送信", command=self.sendmessage)
         sendbutton.pack(anchor="w", side="left")
         chatframe.pack()
-
 
         self.window.bind("<Return>", lambda event: self.sendmessage())
 
         threading.Thread(target=self.rcv).start()
 
         # 名前変更ボタンを追加
-        change_name_button = tkinter.Button(main_canvas, text="名前を変更", command=self.change_name)
+        change_name_button = tkinter.Button(
+            main_canvas, text="名前を変更", command=self.change_name)
         change_name_button.pack()
 
         self.window.bind("<KeyPress>", self.type_event)
 
-        edit_character_button = tkinter.Button(main_canvas, text="キャラクターステータスを編集", command=lambda:self.status_window(self.default_font, self.appdata_dir, self.playername_entry.get()))
+        edit_character_button = tkinter.Button(main_canvas, text="キャラクターステータスを編集", command=lambda: self.status_window(
+            self.default_font, self.appdata_dir, self.playername_entry.get()))
         edit_character_button.pack()
-    
+
         # キャラクター選択画面に移動するボタン
-        select_character_button = tkinter.Button(main_canvas, text="キャラクターを選択", command=self.show_change_account)
+        select_character_button = tkinter.Button(
+            main_canvas, text="キャラクターを選択", command=self.show_change_account)
         select_character_button.pack()
 
         # 今のキャラクターを表示しとくやつ
         playername_canvas = tkinter.Canvas()
         playername_canvas.pack(side="bottom", anchor="e")
 
-        self.playername_entry = tkinter.Entry(playername_canvas, state="readonly", font=self.default_font, justify=tkinter.RIGHT)
+        self.playername_entry = tkinter.Entry(
+            playername_canvas, state="readonly", font=self.default_font, justify=tkinter.RIGHT)
         self.playername_entry.pack(side="bottom", anchor="e")
 
-        tkinter.Label(playername_canvas, text="現在のプレイヤー:", font=self.default_font).pack(side="bottom", anchor="e")
+        tkinter.Label(playername_canvas, text="現在のプレイヤー:",
+                      font=self.default_font).pack(side="bottom", anchor="e")
 
         self.window.protocol("WM_DELETE_WINDOW", self.window_close)
         self.window.mainloop()
@@ -123,7 +141,8 @@ class main:
         self.playername_entry.configure(state="readonly")
 
     def show_change_account(self):
-        self.character_select = characterSelect.main(self.appdata_dir, self.default_font, self.change_playername)
+        self.character_select = characterSelect.main(
+            self.appdata_dir, self.default_font, self.change_playername)
 
     def diceroll(self, d="", f=""):
         D_count = int(self.D_countBox.get())
@@ -135,7 +154,8 @@ class main:
         cache = []
         for _ in range(D_count):
             cache.append(random.randint(1, F_count))
-        self.soc.send(f"({self.playername_entry.get()}){sum(cache)} ({'+'.join(map(str, cache))})-{D_count}D{F_count}".encode())
+        self.soc.send(
+            f"({self.playername_entry.get()}){sum(cache)} ({'+'.join(map(str, cache))})-{D_count}D{F_count}".encode())
 
     def private_diceroll(self):
         D_count = int(self.D_countBox.get())
@@ -155,7 +175,8 @@ class main:
         diceval_entry.configure(state="readonly")
         diceval_entry.pack(side="left")
 
-        roll_button = tkinter.Button(diceval_canvas, text="振る", command=lambda:self.diceroll(D, F), font=("Arial", 10))
+        roll_button = tkinter.Button(
+            diceval_canvas, text="振る", command=lambda: self.diceroll(D, F), font=("Arial", 10))
         roll_button.pack(side="left")
 
         def delcanvas(id):
@@ -168,7 +189,8 @@ class main:
                         writer.writerow(c)
             diceval_canvas.destroy()
 
-        tkinter.Button(diceval_canvas, text="削除", command=lambda:delcanvas(id)).pack(side="left")
+        tkinter.Button(diceval_canvas, text="削除",
+                       command=lambda: delcanvas(id)).pack(side="left")
 
     def savedice(self):
         D_count = int(self.D_countBox.get())
@@ -191,14 +213,16 @@ class main:
             if msg.startswith("/"):
                 self.handle_command(str(msg))
             else:
-                self.soc.send(f"({self.playername_entry.get()})「{msg}」".encode())
+                self.soc.send(
+                    f"({self.playername_entry.get()})「{msg}」".encode())
             self.chatentry.delete(0, tkinter.END)
 
     def insert_to_log(self, txt):
         self.logbox.configure(state="normal")
         log_parts = txt.split("::")
         if len(log_parts) == 2:
-            self.logbox.insert(tkinter.END, f"{log_parts[0]}\n", (log_parts[1],))
+            self.logbox.insert(
+                tkinter.END, f"{log_parts[0]}\n", (log_parts[1],))
         else:
             self.logbox.insert(tkinter.END, f"{txt}\n")
         self.logbox.configure(state="disabled")
@@ -212,7 +236,8 @@ class main:
                 txt = self.soc.recv(2048).decode()
                 if txt.startswith("色: "):
                     player_color = txt.split("色: ")[1]
-                    self.logbox.tag_configure(player_color, foreground=player_color)
+                    self.logbox.tag_configure(
+                        player_color, foreground=player_color)
                 else:
                     # メッセージに色のタグをつける
                     if "::" in txt:
@@ -241,18 +266,23 @@ class main:
 
     # コマンドのヘルプを追加する
     def show_help(self):
-        help_text = """
-        コマンド一覧:
-        /clear - チャットログをクリアする
-        /help - コマンドのヘルプを表示する
-        """
+        # help_text = """
+        # コマンド一覧:
+        # /clear - チャットログをクリアする
+        # /help - コマンドのヘルプを表示する
+        # """
+        help_text = "コマンド一覧:\n" + \
+            "\n".join(
+                [f'{c} - {self.command_handlers[c]["desc"]}' for c in self.command_handlers if self.command_handlers[c]["show"]])
+
         self.insert_to_log(help_text)
 
 # 名前を変更するときに出る新しいウィンドウとそのための関数
     def change_name(self):
         changewindow = tkinter.Toplevel()
 
-        tkinter.Label(changewindow, text="新しい名前を入力してください", font=self.default_font).pack()
+        tkinter.Label(changewindow, text="新しい名前を入力してください",
+                      font=self.default_font).pack()
 
         new_name_entry = tkinter.Entry(changewindow, font=self.default_font)
         new_name_entry.pack()
@@ -263,7 +293,8 @@ class main:
                 self.soc.send(f"名前変更: {new_name}".encode())
                 changewindow.destroy()
 
-        tkinter.Button(changewindow, text="名前を変更", command=submit_new_name).pack()
+        tkinter.Button(changewindow, text="名前を変更",
+                       command=submit_new_name).pack()
 
         def changewindow_type_event(event):
             if str(event.keysym) == "Return" and str(changewindow.focus_get()) == ".!toplevel.!entry":
@@ -278,6 +309,32 @@ class main:
         self.soc.close()
         exit()
 
+    def load_status(self, args):
+        name = self.playername_entry.get()
+        status_name = args[0]
+        characters_dir = Path(fr"{self.appdata_dir}/characters/")
+        if name == "":
+            self.insert_to_log("プレイヤーを選択してください。")
+            return
+        with open(fr"{characters_dir}/{name}.json", encoding="utf-8") as f:
+            status = json.load(f)
+            if status_name == "*":
+                self.insert_to_log(
+                    f"=========================\n-{name}-ステータス一覧:\n=========================")
+                for i, all_status in enumerate(status["status"]):
+                    for c in all_status:
+                        self.insert_to_log(
+                            f"{c}:{status['status'][i][c]}")
+                return status['status']
+            try:
+                status_value = status['status'][0][status_name]
+                self.insert_to_log(
+                    f"{status_name}ステータス値:{status_value}")
+                return status_value
+            except KeyError:
+                self.insert_to_log(f"「{status_name}」は、存在しないパラメーターです。")
+                return
+
     def clear(self):
         self.logbox.configure(state="normal")
         self.logbox.delete('1.0', tkinter.END)
@@ -285,17 +342,26 @@ class main:
         self.logbox.configure(state="disabled")
 
     # コマンドハンドラを登録する関数
-    def register_command(self, command, handler):
+    def register_command(self, command, handler, description="詳細情報なし", show_in_help=True):
         time.sleep(1)
-        self.command_handlers[command] = handler
+        self.command_handlers[command] = {
+            "desc": description, "handler": handler, "show": show_in_help}
 
 # コマンドを処理する関数
     def handle_command(self, command):
-        handler = self.command_handlers[command]
+        splited_command = command.split()
+        args = splited_command[1:]
+        handler = self.command_handlers[splited_command[0]]["handler"]
         if handler:
-            handler()
+            if args == []:
+                try:
+                    return handler()
+                except Exception() as e:
+                    self.insert_to_log("エラーが発生しました。\nエラー:{e}".format(e))
+                    return
+            else:
+                return handler(args)
 
     # コマンドハンドラにclear_logを登録
     def clear_log(self):
         self.clear()
-    

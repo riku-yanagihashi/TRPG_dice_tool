@@ -2,6 +2,8 @@ import tkinter
 import tkinter.messagebox
 
 # 名前を決めるウィンドウのプログラム
+
+
 class main:
     def __init__(self, default_font, soc):
         self.soc = soc
