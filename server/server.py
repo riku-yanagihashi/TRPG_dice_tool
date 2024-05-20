@@ -3,7 +3,7 @@ import threading
 import random
 
 soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-soc.bind(("127.0.0.1", 60013))
+soc.bind(("192.168.1.221", 60065))
 soc.listen(200)
 
 clients = []

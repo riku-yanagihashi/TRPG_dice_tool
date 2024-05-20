@@ -51,7 +51,7 @@ def serverconnect(server_addr):
 
 
 # サーバーへの接続プログラム
-server_addr = ("153.240.10.7", 60013)
+server_addr = ("153.240.10.7", 60065)
 while True:
     "124.100.76.59"
     if serverconnect(server_addr):
