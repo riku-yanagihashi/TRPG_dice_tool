@@ -22,9 +22,10 @@ except FileExistsError:
     pass
 
 dataPaths = {
-    "saveddice": Path(fr"{appdata_dir}\\savedDice.csv")
+    "saveddice": Path(fr"{appdata_dir}/savedDice.csv")
 }
 
+print(dataPaths["saveddice"])
 for c in dataPaths.values():
     c: Path
     if not c.exists():
@@ -42,4 +43,5 @@ soc.connect(("127.0.0.1", 60013))
 
 nameset.main(default_font, soc)
 
-mainclass = mainwindow.main(soc, default_font, statuswindow.main, dataPaths, appdata_dir)
+mainclass = mainwindow.main(
+    soc, default_font, statuswindow.main, dataPaths, appdata_dir)

@@ -12,14 +12,16 @@ client_colors = {}
 # 色の種類
 colors = ["red", "green", "blue", "orange", "purple", "brown", "pink"]
 
-def send(txt:str):
+
+def send(txt: str):
     for c in clients:
         try:
             c.send(txt.encode())
         except Exception:
             pass
 
-def clt(client:socket.socket, clientname):
+
+def clt(client: socket.socket, clientname):
     try:
         while True:
             rcv = client.recv(2048).decode()
@@ -27,7 +29,8 @@ def clt(client:socket.socket, clientname):
                 new_name = rcv.split("名前変更: ")[1]
                 send(f"{clientname}が名前を{new_name}に変更しました。")
                 print(f"{clientname}が名前を{new_name}に変更しました。")
-                client_colors[new_name] = client_colors.pop(clientname)  # 色の情報を更新
+                client_colors[new_name] = client_colors.pop(
+                    clientname)  # 色の情報を更新
                 clientname = new_name  # クライアントの名前を新しくする
             elif rcv != "":
                 color = client_colors[clientname]
@@ -36,21 +39,22 @@ def clt(client:socket.socket, clientname):
     except Exception:
         pass
 
+
 while True:
     client, addr = soc.accept()
     try:
         initial_name = client.recv(1024).decode()  # 参加時の名前を取得
-        
+
         send(f"{initial_name}が参加しました。")
         print(f"{initial_name}が参加しました。")
-        
+
         # プレイヤーに色を割り当てる
         client_color = random.choice(colors)
         client_colors[initial_name] = client_color
-        
+
         # クライアントに色情報を送信
         client.send(f"色: {client_color}".encode())
-        
+
         clients.append(client)
         threading.Thread(target=clt, args=(client, initial_name)).start()
     except Exception:
