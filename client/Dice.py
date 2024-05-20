@@ -51,8 +51,9 @@ def serverconnect(server_addr):
 
 
 # サーバーへの接続プログラム
+server_addr = ("153.240.10.7", 60013)
 while True:
-    server_addr = ("127.0.0.1", 60013)
+    "124.100.76.59"
     if serverconnect(server_addr):
         break
     elif tkinter.messagebox.askyesno(title="接続エラー", message="サーバーへの接続に失敗しました。\n接続先のIPを変更しますか?"):
@@ -65,6 +66,8 @@ while True:
             new_ip = new_ip_entry.get()
             global server_addr
             server_addr = (new_ip, 60013)
+            global reconnet_window
+            reconnet_window.destroy()
         tkinter.Button(text="変更して再接続", command=reconnect).pack()
         reconnet_window.protocol("WM_DELETE_WINDOW", exit)
         reconnet_window.mainloop()
