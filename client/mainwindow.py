@@ -28,7 +28,7 @@ class main:
         self.register_command("/clear", self.clear_log, "チャットログをクリアする")
         self.register_command("/c", self.clear_log, show_in_help=False)
         self.register_command("/help", self.show_help, "コマンドのヘルプを表示する")
-        self.register_command("/load", self.load_status, "指定されたステータス情報を表示する")
+        self.register_command("/show", self.load_status, "指定されたステータス情報を表示する")
 
         # csvからセーブ済みのダイスをロード
         with open(self.dataPaths["saveddice"]) as f:

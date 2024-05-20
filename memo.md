@@ -42,7 +42,7 @@
 - /gm {player_id} でgm権限を付与
 - /showstatus {character_id}　でキャラのステータスを表示
 - /showstatus {character_id} {str,conなどのやつ}　でキャラのステータスを絞れるようにする
-- /show {dexみたいな感じ} で参加しているキャラクターの値を表示
+- ~~/show {dexみたいな感じ} で参加しているキャラクターの値を表示~~
 - /? or /help でコマンドのヘルプを表示
 - /end クライアントを閉じる
 - /bag give {player_id} {player_id} 最初のidが渡す側、後者が渡される側で、持ち物の譲渡ができる
