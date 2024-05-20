@@ -354,7 +354,11 @@ class main:
         handler = self.command_handlers[splited_command[0]]["handler"]
         if handler:
             if args == []:
-                return handler()
+                try:
+                    return handler()
+                except Exception() as e:
+                    self.insert_to_log("エラーが発生しました。\nエラー:{e}".format(e))
+                    return
             else:
                 return handler(args)
 
