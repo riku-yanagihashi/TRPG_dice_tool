@@ -260,9 +260,9 @@ class main:
             case "t":
                 self.chatentry.focus_set()
             case "slash":
-                if str(self.window.focus_get()) != ".!frame.!entry":
+                # print(self.window.focus_get())
+                if str(self.window.focus_get()) != ".!canvas.!frame.!entry":
                     self.chatentry.focus_set()
-                else:
                     self.chatentry.insert(tkinter.END, '/')
 
     # コマンドのヘルプを追加する
