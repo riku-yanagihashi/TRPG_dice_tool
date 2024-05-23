@@ -25,11 +25,14 @@ class main:
 
         self.status_window = status_window
 
+
         self.register_command("/clear", self.clear_log, "チャットログをクリアする")
         self.register_command("/c", self.clear_log, show_in_help=False)
         self.register_command("/help", self.show_help, "コマンドのヘルプを表示する")
         self.register_command("/?", self.show_help, show_in_help=False)
         self.register_command("/show", self.load_status, "指定されたステータス情報を表示する")
+        self.register_command("/end", self.end_application, "アプリを終了")
+
 
         # csvからセーブ済みのダイスをロード
         with open(self.dataPaths["saveddice"]) as f:
@@ -357,7 +360,7 @@ class main:
             if args == []:
                 try:
                     return handler()
-                except Exception() as e:
+                except Exception as e:
                     self.insert_to_log("エラーが発生しました。\nエラー:{e}".format(e))
                     return
             else:
@@ -366,3 +369,8 @@ class main:
     # コマンドハンドラにclear_logを登録
     def clear_log(self):
         self.clear()
+
+    # /end
+    def end_application(self):
+        self.soc.close()
+        exit()
