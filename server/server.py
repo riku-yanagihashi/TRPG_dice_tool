@@ -1,9 +1,18 @@
-import socket
-import threading
-import random
+import os
+import socket, threading, random
 
+from dotenv import load_dotenv
+from os.path import join, dirname
+
+# サーバーIPとサーバーポートを.envから読み込み
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
+_ip = os.getenv("SERVER_IP")
+_port = int(os.getenv("SERVER_PORT"))
+
+# サーバー起動
 soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-soc.bind(("192.168.1.221", 60065))
+soc.bind((_ip, _port))
 soc.listen(200)
 
 clients = []
@@ -39,6 +48,7 @@ def clt(client: socket.socket, clientname):
     except Exception:
         pass
 
+print("=====<Diceサーバー起動>=====")
 
 while True:
     client, addr = soc.accept()
