@@ -4,6 +4,10 @@ import socket, threading, random
 from dotenv import load_dotenv
 from os.path import join, dirname
 
+
+import datas, jsonloader
+
+
 # サーバーIPとサーバーポートを.envから読み込み
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
@@ -23,6 +27,7 @@ colors = ["red", "green", "blue", "orange", "purple", "brown", "pink"]
 
 
 def send(txt: str):
+    print(txt)
     for c in clients:
         try:
             c.send(txt.encode())
@@ -34,17 +39,22 @@ def clt(client: socket.socket, clientname):
     try:
         while True:
             rcv = client.recv(2048).decode()
-            if rcv.startswith("名前変更: "):
-                new_name = rcv.split("名前変更: ")[1]
-                send(f"{clientname}が名前を{new_name}に変更しました。")
-                print(f"{clientname}が名前を{new_name}に変更しました。")
-                client_colors[new_name] = client_colors.pop(
-                    clientname)  # 色の情報を更新
-                clientname = new_name  # クライアントの名前を新しくする
-            elif rcv != "":
+            if not rcv.startswith("/@"):
                 color = client_colors[clientname]
                 send(f"{clientname}: {rcv}::{color}")
-                print(f"{clientname}: {rcv}::{color}")
+            else:
+                command_args = rcv.split()
+                match command_args[0][2:]:
+                    # クライアントの表示名の変更
+                    case "changename":
+                        new_name = command_args[1]
+                        send(f"{clientname}が名前を{new_name}に変更しました。")
+                        client_colors[new_name] = client_colors.pop(clientname)  # 色の情報を更新
+                        clientname = new_name  # クライアントの名前を新しくする
+                    case "update":
+                        version = command_args[1]
+                        os_name = command_args[2]
+                        client.send(str(jsonloader.loadjsondata(version, os_name)).encode())
     except Exception:
         pass
 
@@ -52,11 +62,11 @@ print("=====<Diceサーバー起動>=====")
 
 while True:
     client, addr = soc.accept()
+    client.send(datas.latest_version.encode())
     try:
         initial_name = client.recv(1024).decode()  # 参加時の名前を取得
 
         send(f"{initial_name}が参加しました。")
-        print(f"{initial_name}が参加しました。")
 
         # プレイヤーに色を割り当てる
         client_color = random.choice(colors)

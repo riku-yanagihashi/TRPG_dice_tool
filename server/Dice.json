@@ -1,0 +1,35 @@
+{
+  "latest": {
+    "Darwin": {
+      "name": "Dice3.0.0.app",
+      "url": "discord_url",
+      "description": "自動アップデート機能の追加"
+    },
+    "Windows": {
+      "name": "Dice3.0.0.exe",
+      "url": "discord_url",
+      "description": "自動アップデート機能の追加"
+    }
+  },
+  "2.0.0": {
+    "Windows": {
+      "name": "Dice2.0.0.exe",
+      "url": "https://cdn.discordapp.com/attachments/1242688245091799060/1242719728838115338/Dice2.0.0.exe?ex=664edc6f&is=664d8aef&hm=7b672c684181c8199afadec8d91085c84847ee560381eff94f5a21e25567a811&",
+      "description": "複数の機能の追加\n・プレイヤーへの色の割り当て\n・キャラクターの名前の表示\n・キャラクター情報のセーブ\n・ダイスの保存\n・プライベートダイスの追加"
+    }
+  },
+  "1.1.0": {
+    "Windows": {
+      "name": "Dice1.1.0.exe",
+      "url": "https://cdn.discordapp.com/attachments/1242688245091799060/1242719690170699797/Dice1.1.0.exe?ex=664edc66&is=664d8ae6&hm=811a43c034de1bb92eed5bd41a6e93117753a82e520a83d50f35899f588b8896&",
+      "description": "アプリケーションを閉じた際の挙動の修正"
+    }
+  },
+  "1.0.0": {
+    "Windows": {
+      "name": "Dice1.0.0.exe",
+      "url": "https://cdn.discordapp.com/attachments/1242688245091799060/1242719651650076722/Dice1.0.0.exe?ex=664edc5d&is=664d8add&hm=2e2fb580642b7048593aa3ec4af294d59f8c4f90c4ce8f26f6b14434f18833e8&",
+      "description": "オンラインでダイスを振るアプリケーション"
+    }
+  }
+}

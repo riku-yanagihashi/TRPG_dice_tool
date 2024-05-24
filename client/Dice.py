@@ -4,9 +4,7 @@ from pathlib import Path
 import platform
 import tkinter.messagebox
 
-import mainwindow
-import nameset
-import statuswindow
+import application_data, updator, mainwindow, nameset, statuswindow
 
 
 default_font = ("Arial", 14)
@@ -74,6 +72,10 @@ while True:
     else:
         exit()
 
+version = application_data.version
+latest_version = soc.recv(64).decode()
+if (version != latest_version):
+    updator.updator(soc)
 
 nameset.main(default_font, soc)
 

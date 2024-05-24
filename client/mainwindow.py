@@ -291,7 +291,7 @@ class main:
         def submit_new_name():
             new_name = new_name_entry.get()
             if new_name:
-                self.soc.send(f"名前変更: {new_name}".encode())
+                self.soc.send(f"/@changename {new_name}".encode())
                 changewindow.destroy()
 
         tkinter.Button(changewindow, text="名前を変更",
@@ -357,7 +357,7 @@ class main:
             if args == []:
                 try:
                     return handler()
-                except Exception() as e:
+                except Exception as e:
                     self.insert_to_log("エラーが発生しました。\nエラー:{e}".format(e))
                     return
             else:
